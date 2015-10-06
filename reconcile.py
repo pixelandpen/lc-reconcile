@@ -156,4 +156,3 @@ if __name__ == '__main__':
     oparser.add_option('-d', '--debug', action='store_true', default=False)
     opts, args = oparser.parse_args()
     app.debug = opts.debug
-    app.run(host='0.0.0.0')
