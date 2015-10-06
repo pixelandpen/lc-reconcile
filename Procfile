@@ -1,1 +1,1 @@
-web: python reconcile.py
+web: gunicorn app:app
