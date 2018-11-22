@@ -1,4 +1,22 @@
-##About
+## Docker instructions
+
+The Flask app can be built as a Docker image and then served up on any port via a container.
+
+To build the image, use something like:
+
+```
+docker build -t pixelandpen/lc-reconcile .
+```
+
+This will create an image tagged as `pixelandpen/lc-reconcile`. 
+
+To run the container at port 8080 (overriding the port 5000 default), for example:
+
+```
+docker run --name lc-reconcile -d --rm -p 8080:5000 pixelandpen/lc-reconcile
+```
+
+## About
 
 An OpenRefine reconciliation service for the Library of Congress Subject Headings and the Library of Congress Name Authority File available via [id.loc.gov](http://id.loc.gov).
 
@@ -10,7 +28,7 @@ See the [OpenRefine Standard Reconciliation Service API documentation (admittedl
  
 As ever, I'm writing this from the viewpoint of a metadataist who had a need to fill for work projects, not a developer with the ability or time to make something perfect. Improvements, corrections or suggestions are greatly welcomed.
 
-##Hosted Version Instructions
+## Hosted Version Instructions
 
 Hosted version at [https://lc-reconcile.herokuapp.com/](https://lc-reconcile.herokuapp.com/). This works, but easily gets overloaded. For big recon jobs, its recommended to download this repo and run locally. See the **Run Locally** section below.
 
@@ -27,7 +45,7 @@ To run the hosted version:
 7. /LoC searches LCNAF and LCSH, other options just search the one chosen.
 8. Click 'start reconciling'.
 
-##Run Locally Instructions
+## Run Locally Instructions
 
 Runs directly on localhost:5000 (no /reconcile needed for this recon service)
 
@@ -61,24 +79,24 @@ When you're down, shut down OpenRefine as you normally would. Go to the terminal
 
 Let me know if you have questions - email is charlow2(at)utk(dot)edu and Twitter handle is @cm_harlow
 
-##Plans for Improvement
+## Plans for Improvement
 
 There are lots of improvements and repairs to this code forthcoming, but I needed a basic LCNAF Openrefine Recon Service like yesterday for a massive metadata migration project. Please submit pull requests and/or issues on this for any improvements or bugs found. 
 
 I do want to add a new service that can handle in-OpenRefine-project search refinements. The documentation sucks on thisfunctionality for OpenRefine or the no-longer-existent Freebase API that it was built off of, so if you have any advice on this, please do let me know.
 
-##Provenance
+## Provenance
 
 Michael Stephens wrote a [demo reconciliation service](https://github.com/mikejs/reconcile-demo) and Ted Lawless wrote a [FAST reconciliation service](https://github.com/lawlesst/fast-reconcile) that this code modifies and builds off of.
 
 All of the access to [id.loc.gov](http://id.loc.gov/) that this OpenRefine Reconciliation service builds off of is 
 indebted to those who made/make id.loc.gov an option. Special thanks to Kevin Ford for reaching out and helping with understanding the various id.loc.gov query options.
 
-##How This Service Handles Your Query
+## How This Service Handles Your Query
 
 This service takes the query from your OpenRefine project - i.e. the terms you have listed in your chosen column for reconciliation in your OpenRefine project - and according to the index you choose, works in this way at the moment:
 
-###For the LoC index (search LCNAF and LCSH at same time):
+### For the LoC index (search LCNAF and LCSH at same time):
 
 1. Normalize the query with the text.py normalize function, edited for LC headings peculiarities.
 2. Run the query against the id.loc.gov Suggest API (see **Special Notes**) for both authorities and capture the returned possible matches based off of preferred labels.
@@ -86,7 +104,7 @@ This service takes the query from your OpenRefine project - i.e. the terms you h
 4. Rank all the possible matches founded in steps 2 and 3 based off of fuzzy wuzzy matching/rankings between the original, normalized query and the normalized returned labels.
 5. Return the top 3 results from step 4, along with their URIs.
 
-###For the LCNAF:
+### For the LCNAF:
 
 1. Normalize the query with the text.py normalize function, edited for LC headings peculiarities.
 2. Run the query against the id.loc.gov Suggest API (see **Special Notes**) for names only and capture the returned possible matches based off of preferred labels.
@@ -94,7 +112,7 @@ This service takes the query from your OpenRefine project - i.e. the terms you h
 4. Rank all the possible matches founded in steps 2 and 3 based off of fuzzy wuzzy matching/rankings between the original, normalized query and the normalized returned labels.
 5. Return the top 3 results from step 4, along with their URIs.
 
-###For the LCSH:
+### For the LCSH:
 
 1. Normalize the query with the text.py normalize function, edited for LC headings peculiarities.
 2. Run the query against the id.loc.gov Suggest API (see **Special Notes**) for subjects only and capture the returned possible matches based off of preferred labels.
@@ -102,11 +120,11 @@ This service takes the query from your OpenRefine project - i.e. the terms you h
 4. Rank all the possible matches founded in steps 2 and 3 based off of fuzzy wuzzy matching/rankings between the original, normalized query and the normalized returned labels.
 5. Return the top 3 results from step 4, along with their URIs.
 
-###What I'm considering:
+### What I'm considering:
 
 Adding a new step 2 for all the above cases that first sees if there is an exact match found view id.loc.gov/authorities/label API (see **Special Notes**) and if such exists, return that as a match to OpenRefine, skipping the suggest and didyoumean (i.e. the fuzzy matching) services.
 
-###Why do this?
+### Why do this?
 
 The above allows us to take our OpenRefine terms - which could be any manner of format/style/etc. - and get the top results based off of both preferred and alternate labels in the LCSH and LCNAF (or just one as chosen). Using one of the id.loc.gov services mentioned below alone would only allow us to:
 
@@ -116,7 +134,7 @@ The above allows us to take our OpenRefine terms - which could be any manner of 
 
 We cannot say for all OpenRefine projects or even metadata generally (which this service is built to handle) which of the above cases only we should target; instead, we want to support all of them and get the best results from the aggregates.
 
-##Special Notes
+## Special Notes
 
 This service runs off a number of ways to access Library of Congress Name Authority File and Subject Headings through [id.loc.gov](http://id.loc.gov/).
 
@@ -126,7 +144,7 @@ The test case for the following examples is the musician [Prince](http://id.loc.
  
 (If you want to test the following yourself, and aren't sure how, check out [Postman Chrome Add-on](https://www.getpostman.com/), though most of these can be tested by entering in your web browser.)
 
-###id.loc.gov/authorities/label/QUERY
+### id.loc.gov/authorities/label/QUERY
 
 Content negotiation built into id.loc.gov means that this URL pattern, when QUERY exactly matches either a preferred label/heading or an alternate label/heading/cross-reference, will return the id.loc.gov authority record for the entity. If QUERY does not exactly match either a preferred label or an alternate label, it returns a 404 No match found page.
 
@@ -134,7 +152,7 @@ The default response is the HTML id.loc.gov record, though you can also receive 
 
 You do not need to indicate the particular authority file (names or subjects) in the URL for this to work, though you can indicate either if you just want responses for headings from either the NAF or the LCSH.
 
-####Examples
+#### Examples
 
 * http://id.loc.gov/authorities/label/Prince
 * http://id.loc.gov/authorities/label/TAFKAP
@@ -164,7 +182,7 @@ A HTTP Get request for any of the above URLs issued with any header parameter Ac
 
 Any URL with a part of the label will return a 404 Not found - this only works with exact matches.
 
-###id.loc.gov/authorities/suggest/?q=QUERY
+### id.loc.gov/authorities/suggest/?q=QUERY
 
 This is a service built into id.loc.gov that returns a number of top matches for QUERY from id.loc.gov. 
 
@@ -216,7 +234,7 @@ It will return a JSON list of arrays, the first array being the preferred labels
 
 You do not need to indicate the particular authority file (names or subjects) in the URL for this to work, though you can indicate either if you just want responses for headings from either the NAF or the LCSH.
 
-####Examples
+#### Examples
 
 * http://id.loc.gov/authorities/suggest/?q=Prince
 * http://id.loc.gov/authorities/names/suggest/?q=Prince
@@ -328,7 +346,7 @@ The above, entered without other information into a web browser, return matches 
 ]
 ```
 
-###id.loc.gov/authorities/[names|subjects]/didyoumean/?label=QUERY
+### id.loc.gov/authorities/[names|subjects]/didyoumean/?label=QUERY
 
 This is a service built into id.loc.gov that returns possible preferred labels and URIs for the top matches between QUERY and cross-reference or alternate heading in a LCNAF/LCSH authority record from id.loc.gov. 
 
@@ -347,7 +365,7 @@ It will return a XML object, a simplified form of the response given below:
 </idservice:service>
 ```
 
-####Examples
+#### Examples
 
 * http://id.loc.gov/authorities/names/didyoumean/?label=TAFKAP
 
