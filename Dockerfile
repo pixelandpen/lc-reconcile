@@ -3,7 +3,6 @@ FROM python:3.4.3
 RUN useradd -d /home/flaskapp flaskapp
 
 #RUN apt-get update && apt-get upgrade -y
-RUN pip install flask
 
 WORKDIR /home/flaskapp
 
@@ -24,4 +23,3 @@ EXPOSE 5000
 ENTRYPOINT ["python"]
 
 CMD ["reconcile.py"]
-
